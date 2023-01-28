@@ -97,7 +97,7 @@ public class WhatsappRepository {
     public int sendMessage(Message message, User sender, Group group) throws Exception{
         String groupName = group.getName();
 
-        if(!groupHashMap.containsKey(groupName)) throw new Exception("Group does not exist");
+        if(groupName==null || !groupHashMap.containsKey(groupName)) throw new Exception("Group does not exist");
 
         if( !userGroupDb.containsKey(sender.getName()) || !userGroupDb.get(sender.getName()).equals(groupName)) throw new Exception("You are not allowed to send message");
 
@@ -134,20 +134,22 @@ public class WhatsappRepository {
     }
 
     public int removeUser(User user) throws Exception{
+
         String username = user.getName();
 
-        if(!userGroupDb.containsKey(username) ) throw new Exception("User not found");
+        if(username==null || !userGroupDb.containsKey(username) ) throw new Exception("User not found");
 
         String groupname = userGroupDb.get(username);
-        if(groupAdminDb.get(groupname).equals(username)) throw new Exception("Cannot remove admin");
+
+        if(groupname==null || groupAdminDb.get(groupname).equals(username)) throw new Exception("Cannot remove admin");
 
         userGroupDb.remove(username);
         List<Integer> messagesList = userMessageDb.get(username);
 
         List<Integer> messagesInGroup = groupMessageDb.get(groupname);
         for(int msgId : messagesList){
-            messagesInGroup.remove(msgId);
-            messageHashMap.remove(msgId);
+            if(messagesInGroup.contains(msgId)) messagesInGroup.remove(msgId);
+            if(messageHashMap.containsKey(msgId)) messageHashMap.remove(msgId);
         }
 
         groupMessageDb.put(groupname,messagesInGroup);
