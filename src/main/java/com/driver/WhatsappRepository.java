@@ -50,7 +50,6 @@ public class WhatsappRepository {
         // related maps added
         userHashMap.put(mobile,user);
         userMessageDb.put(name,new ArrayList<>());
-        userGroupDb.put(name,null);
 
         //success
         return "SUCCESS";
@@ -61,13 +60,6 @@ public class WhatsappRepository {
         // member should be >2
         int NoOfUsers = users.size();
         if(NoOfUsers<2) return null;
-
-        //one user one grp
-        for(User user: users){
-            if(user.getName()!=null || userGroupDb.get(user.getName())!=null){
-                return null;
-            }
-        }
 
         //grp name
         String groupName;
@@ -87,7 +79,12 @@ public class WhatsappRepository {
 
         // alloting grp to users
         for(User user : users){
+            if(userGroupDb.containsKey(user.getName()) && userGroupDb.get(user.getName())!=null){
+                return null;
+            }
+            else{
                 userGroupDb.put(user.getName(),groupName);
+            }
         }
 
         // setting group maps
@@ -160,8 +157,7 @@ public class WhatsappRepository {
 
         if(groupname==null || groupAdminDb.get(groupname).equals(username)) throw new Exception("Cannot remove admin");
 
-        try {
-            userGroupDb.put(username,null);
+            userGroupDb.remove(username);
             List<Integer> messagesList = userMessageDb.get(username);
 
             List<Integer> messagesInGroup = groupMessageDb.get(groupname);
@@ -182,10 +178,7 @@ public class WhatsappRepository {
             groupHashMap.put(groupname,group);
 
             return group.getNumberOfParticipants()+messagesInGroup.size()+messageHashMap.size();
-        }
-        catch(NullPointerException e){
-            throw new Exception("Im exception");
-        }
+
     }
 
     public String findMessage(Date start, Date end, int K) throws Exception{
