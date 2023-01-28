@@ -41,21 +41,36 @@ public class WhatsappRepository {
     }
 
     public String createUser(String name,String mobile) throws Exception{
+        //throw exception if there
         if(userHashMap.containsKey(mobile)) throw new Exception("User already exists");
 
+        // created obj
         User user = new User(name, mobile);
+
+        // related maps added
         userHashMap.put(mobile,user);
         userMessageDb.put(name,new ArrayList<>());
+        userGroupDb.put(name,null);
+
+        //success
         return "SUCCESS";
     }
 
     public Group createGroup(List<User> users){
 
-        if(users.size()<2) return  null;
-
+        // member should be >2
         int NoOfUsers = users.size();
-        String groupName;
+        if(NoOfUsers<2) return null;
 
+        //one user one grp
+        for(User user: users){
+            if(user.getName()!=null || userGroupDb.get(user.getName())!=null){
+                return null;
+            }
+        }
+
+        //grp name
+        String groupName;
         if(NoOfUsers==2){
             groupName = users.get(1).getName();
         }
@@ -64,20 +79,19 @@ public class WhatsappRepository {
             groupName = "Group "+String.valueOf(groupCount);
         }
 
+        // created grp
         Group group = new Group(groupName, NoOfUsers);
 
+        //creating admin
         String admin = users.get(0).getName();
 
+        // alloting grp to users
         for(User user : users){
-            if(userGroupDb.containsKey(user.getName()) && userGroupDb.get(user.getName())!=null){
-                return null;
-            }
-            else{
                 userGroupDb.put(user.getName(),groupName);
-            }
         }
 
-        groupHashMap.put(groupName, group);
+        // setting group maps
+        groupHashMap.put(groupName,group);
         groupUsersDb.put(groupName,users);
         groupAdminDb.put(groupName,admin);
         groupMessageDb.put(groupName,new ArrayList<>());
@@ -88,13 +102,16 @@ public class WhatsappRepository {
     public int createMessage(String content){
         int messageCount = messageHashMap.size()+1;
         Date msgDate = new Date();
+
         Message message = new Message(messageCount,content);
         message.setTimestamp(msgDate);
+
         messageHashMap.put(messageCount,message);
         return messageCount;
     }
 
     public int sendMessage(Message message, User sender, Group group) throws Exception{
+
         String groupName = group.getName();
 
         if(groupName==null || !groupHashMap.containsKey(groupName)) throw new Exception("Group does not exist");
@@ -143,27 +160,32 @@ public class WhatsappRepository {
 
         if(groupname==null || groupAdminDb.get(groupname).equals(username)) throw new Exception("Cannot remove admin");
 
-        userGroupDb.remove(username);
-        List<Integer> messagesList = userMessageDb.get(username);
+        try {
+            userGroupDb.put(username,null);
+            List<Integer> messagesList = userMessageDb.get(username);
 
-        List<Integer> messagesInGroup = groupMessageDb.get(groupname);
-        for(int msgId : messagesList){
-            if(messagesInGroup.contains(msgId)) messagesInGroup.remove(msgId);
-            if(messageHashMap.containsKey(msgId)) messageHashMap.remove(msgId);
+            List<Integer> messagesInGroup = groupMessageDb.get(groupname);
+            for(int msgId : messagesList){
+                if(messagesInGroup.contains(msgId)) messagesInGroup.remove(msgId);
+                if(messageHashMap.containsKey(msgId)) messageHashMap.remove(msgId);
+            }
+
+            groupMessageDb.put(groupname,messagesInGroup);
+            userMessageDb.remove(username);
+
+            List<User> userList = groupUsersDb.get(groupname);
+            userList.remove(user);
+            groupUsersDb.put(groupname,userList);
+
+            Group group = groupHashMap.get(groupname);
+            group.setNumberOfParticipants(userList.size());
+            groupHashMap.put(groupname,group);
+
+            return group.getNumberOfParticipants()+messagesInGroup.size()+messageHashMap.size();
         }
-
-        groupMessageDb.put(groupname,messagesInGroup);
-        userMessageDb.remove(username);
-
-        List<User> userList = groupUsersDb.get(groupname);
-        userList.remove(user);
-        groupUsersDb.put(groupname,userList);
-
-        Group group = groupHashMap.get(groupname);
-        group.setNumberOfParticipants(userList.size());
-        groupHashMap.put(groupname,group);
-
-        return group.getNumberOfParticipants()+messagesInGroup.size()+messageHashMap.size();
+        catch(NullPointerException e){
+            throw new Exception("Im exception");
+        }
     }
 
     public String findMessage(Date start, Date end, int K) throws Exception{
