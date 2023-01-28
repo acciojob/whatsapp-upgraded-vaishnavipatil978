@@ -121,7 +121,9 @@ public class WhatsappRepository {
 
         if(!groupHashMap.containsKey(groupName)) throw new Exception("Group does not exist");
 
-        if(!groupAdminDb.get(groupName).equals(approver)) throw new Exception("Approver does not have rights");
+        if(!groupAdminDb.get(groupName).equals(approver.getName())) throw new Exception("Approver does not have rights");
+
+        //if( !userGroupDb.containsKey(user.getName()) || !userGroupDb.get(user.getName()).equals(groupName)) throw new Exception("Approver does not have rights");
 
         if( !userGroupDb.containsKey(user.getName()) || !userGroupDb.get(user.getName()).equals(groupName)) throw new Exception("User is not a participant");
 
@@ -139,7 +141,7 @@ public class WhatsappRepository {
         String groupname = userGroupDb.get(username);
         if(groupAdminDb.get(groupname).equals(username)) throw new Exception("Cannot remove admin");
 
-        userGroupDb.put(username,null);
+        userGroupDb.remove(username);
         List<Integer> messagesList = userMessageDb.get(username);
 
         List<Integer> messagesInGroup = groupMessageDb.get(groupname);
