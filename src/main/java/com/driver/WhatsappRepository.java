@@ -88,7 +88,7 @@ public class WhatsappRepository {
     public int createMessage(String content){
         int messageCount = messageHashMap.size()+1;
         Date msgDate = new Date();
-        Message message = new Message(messageCount, content, msgDate);
+        Message message = new Message(messageCount,content,msgDate);
         messageHashMap.put(messageCount,message);
         return messageCount;
     }
