@@ -149,13 +149,14 @@ public class WhatsappRepository {
 
     public int removeUser(User user) throws Exception{
 
-        String username = user.getName();
+        try {
+            String username = user.getName();
 
-        if(username==null || !userGroupDb.containsKey(username) ) throw new Exception("User not found");
+            if(username==null || !userGroupDb.containsKey(username) ) throw new Exception("User not found");
 
-        String groupname = userGroupDb.get(username);
+            String groupname = userGroupDb.get(username);
 
-        if(groupname==null || groupAdminDb.get(groupname).equals(username)) throw new Exception("Cannot remove admin");
+            if(groupname==null || groupAdminDb.get(groupname).equals(username)) throw new Exception("Cannot remove admin");
 
             userGroupDb.remove(username);
             List<Integer> messagesList = userMessageDb.get(username);
@@ -179,25 +180,29 @@ public class WhatsappRepository {
 
             return group.getNumberOfParticipants()+messagesInGroup.size()+messageHashMap.size();
 
-    }
+        }
+        catch (NullPointerException e){
+            String error = e.toString();
+            throw new Exception(error);
+        }
 
-    public String findMessage(Date start, Date end, int K) throws Exception{
+    }
+    public String findMessage(Date start, Date end, int K) throws Exception {
 
         int count = 0;
 
-        for(Message msg : messageHashMap.values()){
+        for (Message msg : messageHashMap.values()) {
             Date msgDate = msg.getTimestamp();
-            if(msgDate.equals(start) || (msgDate.after(start) && msgDate.before(end)) || msgDate.equals(end)){
-                if(count==K) return msg.getContent();
+            if (msgDate.equals(start) || (msgDate.after(start) && msgDate.before(end)) || msgDate.equals(end)) {
+                if (count == K) return msg.getContent();
 
                 count++;
             }
         }
 
-        if(count<K) throw new Exception("K is greater than the number of messages");
+        if (count < K) throw new Exception("K is greater than the number of messages");
 
         return null;
-
     }
 
 
