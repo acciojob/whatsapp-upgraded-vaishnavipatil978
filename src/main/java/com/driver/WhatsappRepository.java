@@ -87,16 +87,6 @@ public class WhatsappRepository {
             //creating admin
             User admin = users.get(0);
 
-            // alloting grp to users
-        /*for(User user : users){
-            if(userGroupDb.containsKey(user.getName()) && userGroupDb.get(user.getName())!=null){
-                return null;
-            }
-            else{
-                userGroupDb.put(user.getName(),groupName);
-            }
-        }*/
-
             // setting group maps
             groupHashMap.put(groupName,group);
             groupUsersDb.put(group,users);
@@ -111,6 +101,7 @@ public class WhatsappRepository {
     }
 
     public int createMessage(String content){
+
         int messageCount = messageHashMap.size()+1;
         Date msgDate = new Date();
 
@@ -124,11 +115,15 @@ public class WhatsappRepository {
     public int sendMessage(Message message, User sender, Group group) throws Exception{
 
         try {
-            if(!groupHashMap.containsKey(group) || !groupMessageDb.containsKey(group)){
+            if (!groupHashMap.containsKey(group) || !groupMessageDb.containsKey(group)) {
                 throw new Exception("Group does not exist");
             }
-            //if( !userGroupDb.containsKey(sender.getName()) || !userGroupDb.get(sender.getName()).equals(groupName)) throw new Exception("You are not allowed to send message");
+        }
+        catch(Exception e){
+            return 0;
+        }
 
+        try{
             boolean present = false;
 
             for(User user : groupUsersDb.get(group)){
@@ -151,28 +146,24 @@ public class WhatsappRepository {
             groupMessageDb.put(group,groupMessages);
 
             messageHashMap.put(message.getId(),message);
-
-            return groupMessageDb.get(group).size();
         }
         catch (Exception e){
-            return 1;
+
         }
+
+        return groupMessageDb.get(group).size();
     }
 
     public String changeAdmin(User approver, User user, Group group) throws Exception{
 
         try {
-            if(!groupHashMap.containsKey(group) || !groupUsersDb.containsKey(group)){
+            if (!groupHashMap.containsKey(group) || !groupUsersDb.containsKey(group)) {
                 throw new Exception("Group does not exist");
             }
 
             if(!groupAdminDb.get(group).equals(approver)){
                 throw new Exception("Approver does not have rights");
             }
-
-            //if( !userGroupDb.containsKey(user.getName()) || !userGroupDb.get(user.getName()).equals(groupName)) throw new Exception("Approver does not have rights");
-
-            //if( !userGroupDb.containsKey(user.getName()) || !userGroupDb.get(user.getName()).equals(groupName)) throw new Exception("User is not a participant");
 
             boolean present = false;
             for(User grpUser : groupUsersDb.get(group)){
@@ -219,7 +210,7 @@ public class WhatsappRepository {
             }
         }
         catch(Exception e){
-            return -2;
+            return 1;
         }
 
         try{
