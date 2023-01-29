@@ -155,7 +155,7 @@ public class WhatsappRepository {
             return groupMessageDb.get(group).size();
         }
         catch (Exception e){
-            return 0;
+            return 1;
         }
     }
 
@@ -219,7 +219,7 @@ public class WhatsappRepository {
             }
         }
         catch(Exception e){
-            return 0;
+            return -2;
         }
 
         try{
