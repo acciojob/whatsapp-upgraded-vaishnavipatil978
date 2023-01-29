@@ -13,6 +13,9 @@ public class Group {
         return name;
     }
 
+    public Group() {
+    }
+
     public void setName(String name) {
         this.name = name;
     }

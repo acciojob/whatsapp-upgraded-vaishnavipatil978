@@ -8,6 +8,9 @@ public class User {
         return name;
     }
 
+    public User() {
+    }
+
     public void setName(String name) {
         this.name = name;
     }
