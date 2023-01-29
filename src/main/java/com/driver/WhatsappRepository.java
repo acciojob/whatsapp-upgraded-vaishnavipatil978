@@ -195,28 +195,34 @@ public class WhatsappRepository {
 
     public int removeUser(User user) throws Exception{
 
+        Group group = null;
+
         try {
-            if( user.getName()==null || !userHashMap.containsKey(user.getName()) ){
+            if (user.getName() == null || !userHashMap.containsKey(user.getName())) {
                 throw new Exception("User not found");
             }
 
-            Group group = null;
-
-            for(Group grp : groupUsersDb.keySet()){
-                for(User grpUser : groupUsersDb.get(grp)){
-                    if(grpUser.equals(user)){
-                        group=grp;
+            for (Group grp : groupUsersDb.keySet()) {
+                for (User grpUser : groupUsersDb.get(grp)) {
+                    if (grpUser.equals(user)) {
+                        group = grp;
                         break;
                     }
                 }
-                if(group!=null){
+                if (group != null) {
                     break;
                 }
             }
 
-            if(group==null){
+            if (group == null) {
                 throw new Exception("User not found");
             }
+        }
+        catch(Exception e){
+            return 0;
+        }
+
+        try{
 
             if(groupAdminDb.get(group).equals(user)){
                 throw new Exception("Cannot remove admin");
@@ -237,19 +243,18 @@ public class WhatsappRepository {
             if(userList.contains(user)) userList.remove(user);
             groupUsersDb.put(group,userList);
 
-            Group group1 = groupHashMap.get(group);
             group.setNumberOfParticipants(userList.size());
-            groupHashMap.put(group1.getName(),group);
+            groupHashMap.put(group.getName(), group);
 
-            int updatedNoUsers = group1.getNumberOfParticipants();
-            int updatedNoOfMsg = groupMessageDb.get(group1).size();
-            int noOfAllmsg = messageHashMap.size();
-
-            return updatedNoUsers+updatedNoOfMsg+noOfAllmsg;
         }
         catch (Exception e){
-            return 0;
+
         }
+        int updatedNoUsers = group.getNumberOfParticipants();
+        int updatedNoOfMsg = groupMessageDb.get(group).size();
+        int noOfAllmsg = messageHashMap.size();
+
+        return updatedNoUsers+updatedNoOfMsg+noOfAllmsg;
 
     }
     public String findMessage(Date start, Date end, int K) throws Exception {
